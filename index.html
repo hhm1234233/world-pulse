@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="世界脉搏">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="format-detection" content="telephone=no">
+<title>世界脉搏 · World Pulse</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23007aff'/%3E%3Ccircle cx='90' cy='90' r='46' fill='none' stroke='white' stroke-width='7'/%3E%3Cellipse cx='90' cy='90' rx='20' ry='46' fill='none' stroke='white' stroke-width='7'/%3E%3Cpath d='M46 74h88M46 106h88' stroke='white' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23007aff'/%3E%3Ccircle cx='90' cy='90' r='46' fill='none' stroke='white' stroke-width='8'/%3E%3Cellipse cx='90' cy='90' rx='20' ry='46' fill='none' stroke='white' stroke-width='8'/%3E%3Cpath d='M46 74h88M46 106h88' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f2f2f7; --bg-elev:#ffffff; --card:#ffffff;
+  --label:#000000; --label2:#3c3c4399; --label3:#3c3c434d;
+  --sep:#3c3c435c; --sep-thin:#3c3c431f;
+  --accent:#007aff; --red:#ff3b30; --orange:#ff9500; --green:#34c759; --purple:#af52de;
+  --fill:#78788033; --fill2:#7878801f;
+  --blur-bg:rgba(242,242,247,.72);
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 6px 18px rgba(0,0,0,.05);
+  --radius:18px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#000000; --bg-elev:#1c1c1e; --card:#1c1c1e;
+    --label:#ffffff; --label2:#ebebf599; --label3:#ebebf54d;
+    --sep:#54545899; --sep-thin:#54545845;
+    --accent:#0a84ff; --red:#ff453a; --orange:#ff9f0a; --green:#30d158; --purple:#bf5af2;
+    --fill:#7878805c; --fill2:#7878803d;
+    --blur-bg:rgba(20,20,22,.72);
+    --shadow:0 1px 2px rgba(0,0,0,.5);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--label);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size:17px; line-height:1.45;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overscroll-behavior-y:none;
+  padding-bottom:calc(40px + env(safe-area-inset-bottom));
+}
+a{color:inherit;text-decoration:none}
+
+/* ---------- Nav ---------- */
+.nav{
+  position:sticky; top:0; z-index:50;
+  padding:calc(env(safe-area-inset-top) + 6px) 0 0;
+  background:var(--blur-bg);
+  -webkit-backdrop-filter:saturate(180%) blur(24px);
+  backdrop-filter:saturate(180%) blur(24px);
+  transition:box-shadow .25s ease;
+}
+.nav.scrolled{box-shadow:0 .5px 0 var(--sep-thin)}
+.nav-row{display:flex;align-items:center;justify-content:space-between;padding:4px 20px 2px;gap:12px}
+.nav-compact{font-size:17px;font-weight:600;letter-spacing:-.2px;opacity:0;transform:translateY(6px);transition:.25s ease;pointer-events:none;position:absolute;left:0;right:0;text-align:center;top:calc(env(safe-area-inset-top) + 10px)}
+.nav.scrolled .nav-compact{opacity:1;transform:none}
+.nav.scrolled .big{opacity:0;transform:translateY(-4px);height:0;margin:0;overflow:hidden}
+.big{transition:.25s ease}
+h1{font-size:34px;line-height:1.12;font-weight:700;letter-spacing:-.7px;margin:2px 0 1px}
+.sub{font-size:13px;color:var(--label2);letter-spacing:-.05px;margin:0 0 2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none;box-shadow:0 0 0 0 rgba(52,199,89,.5);animation:pulse 2.4s infinite}
+.dot.warn{background:var(--orange);animation:none}
+.dot.err{background:var(--red);animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,199,89,.45)}70%{box-shadow:0 0 0 7px rgba(52,199,89,0)}100%{box-shadow:0 0 0 0 rgba(52,199,89,0)}}
+
+.iconbtn{
+  width:34px;height:34px;flex:none;border:0;border-radius:50%;
+  background:var(--fill2);color:var(--accent);
+  display:grid;place-items:center;cursor:pointer;transition:.15s;
+}
+.iconbtn:active{transform:scale(.9);background:var(--fill)}
+.iconbtn svg{width:18px;height:18px}
+.spin{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- Segmented control ---------- */
+.seg{
+  display:flex;gap:2px;margin:10px 16px 12px;padding:2px;
+  background:var(--fill2);border-radius:9px;position:relative;
+  -webkit-overflow-scrolling:touch;
+}
+.seg button{
+  flex:1;border:0;background:transparent;color:var(--label);
+  font:inherit;font-size:13px;font-weight:500;letter-spacing:-.08px;
+  padding:6px 4px;border-radius:7px;cursor:pointer;position:relative;z-index:2;
+  transition:.2s;white-space:nowrap;
+}
+.seg button[aria-selected="true"]{
+  background:var(--bg-elev);font-weight:600;
+  box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){.seg button[aria-selected="true"]{background:#636366}}
+.seg button:active{opacity:.55}
+
+/* ---------- List ---------- */
+.wrap{padding:0 16px}
+.group{
+  background:var(--card);border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--shadow);margin-bottom:22px;
+}
+.item{
+  display:flex;gap:12px;padding:14px 16px 14px 14px;position:relative;
+  transition:background .15s;cursor:pointer;
+}
+.item:active{background:var(--fill2)}
+.item + .item::before{
+  content:"";position:absolute;top:0;left:52px;right:0;height:1px;
+  background:var(--sep-thin);
+}
+.rank{
+  flex:none;width:26px;text-align:center;padding-top:1px;
+  font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;
+  color:var(--label3);letter-spacing:-.3px;
+}
+.item.top .rank{color:var(--red)}
+.body{flex:1;min-width:0}
+.zh{font-size:16px;font-weight:600;letter-spacing:-.25px;line-height:1.38;margin:0 0 3px;word-break:break-word}
+.en{font-size:13.5px;line-height:1.4;color:var(--label2);margin:0 0 7px;letter-spacing:-.05px;word-break:break-word}
+.en.pending{opacity:.45}
+.meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--label2);letter-spacing:-.02px}
+.chip{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px 7px;border-radius:6px;background:var(--fill2);
+  font-size:11.5px;font-weight:500;line-height:1.5;
+}
+.chip.verify{background:rgba(52,199,89,.16);color:var(--green);font-weight:600}
+.chip.cat-world{background:rgba(0,122,255,.14);color:var(--accent)}
+.chip.cat-biz{background:rgba(255,149,0,.16);color:var(--orange)}
+.chip.cat-tech{background:rgba(175,82,222,.16);color:var(--purple)}
+.chip svg{width:10px;height:10px}
+.sec{
+  font-size:13px;font-weight:600;color:var(--label2);
+  letter-spacing:.4px;text-transform:uppercase;
+  margin:4px 4px 8px;
+}
+
+/* ---------- States ---------- */
+.state{padding:56px 24px;text-align:center;color:var(--label2);font-size:14px}
+.state .spinner{
+  width:26px;height:26px;margin:0 auto 14px;border-radius:50%;
+  border:2.5px solid var(--fill);border-top-color:var(--accent);
+  animation:spin .85s linear infinite;
+}
+.btn{
+  display:inline-block;margin-top:16px;padding:9px 20px;border:0;border-radius:12px;
+  background:var(--accent);color:#fff;font:inherit;font-size:15px;font-weight:600;cursor:pointer;
+}
+.btn:active{opacity:.7}
+.btn.sec2{background:var(--fill2);color:var(--accent)}
+
+/* ---------- Diagnostics ---------- */
+details.diag{
+  margin:0 16px 26px;background:var(--card);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+details.diag summary{
+  padding:13px 16px;font-size:14px;font-weight:500;cursor:pointer;
+  list-style:none;display:flex;justify-content:space-between;align-items:center;color:var(--label);
+}
+details.diag summary::-webkit-details-marker{display:none}
+details.diag summary::after{content:"›";font-size:20px;color:var(--label3);transform:rotate(90deg);transition:.2s}
+details.diag[open] summary::after{transform:rotate(-90deg)}
+.diagbody{padding:0 16px 14px;font-size:12.5px;color:var(--label2)}
+.drow{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-top:1px solid var(--sep-thin);font-variant-numeric:tabular-nums}
+.ok{color:var(--green);font-weight:600}
+.bad{color:var(--red);font-weight:600}
+.foot{text-align:center;font-size:11.5px;color:var(--label3);padding:0 24px 30px;line-height:1.6}
+
+/* pull to refresh */
+#ptr{
+  position:fixed;top:calc(env(safe-area-inset-top) + 4px);left:0;right:0;
+  display:grid;place-items:center;pointer-events:none;z-index:60;opacity:0;transition:opacity .2s;
+}
+#ptr .spinner{width:22px;height:22px;border:2.5px solid var(--fill);border-top-color:var(--accent);border-radius:50%}
+</style>
+</head>
+<body>
+
+<div id="ptr"><div class="spinner"></div></div>
+
+<header class="nav" id="nav">
+  <div class="nav-compact">世界脉搏</div>
+  <div class="nav-row big">
+    <div style="min-width:0">
+      <h1>世界脉搏</h1>
+      <p class="sub"><span class="dot" id="dot"></span><span id="status">正在接入全球媒体…</span></p>
+    </div>
+    <button class="iconbtn" id="refresh" aria-label="刷新">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/>
+      </svg>
+    </button>
+  </div>
+  <div class="seg" id="seg" role="tablist">
+    <button role="tab" data-cat="all" aria-selected="true">全部</button>
+    <button role="tab" data-cat="world" aria-selected="false">国际政治</button>
+    <button role="tab" data-cat="biz" aria-selected="false">经济市场</button>
+    <button role="tab" data-cat="tech" aria-selected="false">科技商业</button>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <div class="state"><div class="spinner"></div>正在从全球媒体拉取最新头条…</div>
+</main>
+
+<details class="diag" id="diag" hidden>
+  <summary><span>数据源状态</span><span id="diagCount" style="color:var(--label2);font-weight:400"></span></summary>
+  <div class="diagbody" id="diagBody"></div>
+</details>
+
+<p class="foot">
+  重要性 = 报道该事件的权威媒体数量 × 时效性。<br>
+  标注「N 家媒体」表示该事件已被多家独立媒体交叉证实。<br>
+  每小时自动刷新一次 · 全球同步
+</p>
+
+<script>
+"use strict";
+
+/* ============================================================
+   1. 数据源：全部为国际公认的权威媒体公开 RSS
+   ============================================================ */
+const G = (t) => `https://news.google.com/rss/headlines/section/topic/${t}?hl=en-US&gl=US&ceid=US:en`;
+
+const FEEDS = [
+  // —— 国际政治与冲突 ——
+  {id:'bbc',    name:'BBC',           url:'https://feeds.bbci.co.uk/news/world/rss.xml',                      cat:'world', w:1.00},
+  {id:'guard',  name:'Guardian',      url:'https://www.theguardian.com/world/rss',                            cat:'world', w:0.95},
+  {id:'aje',    name:'Al Jazeera',    url:'https://www.aljazeera.com/xml/rss/all.xml',                        cat:'world', w:0.90},
+  {id:'nyt',    name:'NYT',           url:'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',           cat:'world', w:1.00},
+  {id:'npr',    name:'NPR',           url:'https://feeds.npr.org/1004/rss.xml',                               cat:'world', w:0.85},
+  {id:'dw',     name:'DW',            url:'https://rss.dw.com/rdf/rss-en-world',                              cat:'world', w:0.80},
+  {id:'france', name:'France 24',     url:'https://www.france24.com/en/rss',                                  cat:'world', w:0.78},
+  {id:'gnw',    name:'Google News',   url:G('WORLD'),                                                          cat:'world', w:0.72},
+  {id:'skynews',name:'Sky News',      url:'https://feeds.skynews.com/feeds/rss/world.xml',                    cat:'world', w:0.78},
+  {id:'cbc',    name:'CBC',           url:'https://www.cbc.ca/webfeed/rss/rss-world',                         cat:'world', w:0.75},
+
+  // —— 经济与市场 ——
+  {id:'cnbc',   name:'CNBC',          url:'https://www.cnbc.com/id/100727362/device/rss/rss.html',            cat:'biz',   w:0.90},
+  {id:'nytb',   name:'NYT Business',  url:'https://rss.nytimes.com/services/xml/rss/nyt/Business.xml',        cat:'biz',   w:0.95},
+  {id:'guardb', name:'Guardian Biz',  url:'https://www.theguardian.com/uk/business/rss',                      cat:'biz',   w:0.85},
+  {id:'mw',     name:'MarketWatch',   url:'https://feeds.content.dowjones.io/public/rss/mw_topstories',       cat:'biz',   w:0.85},
+  {id:'gnb',    name:'Google News',   url:G('BUSINESS'),                                                       cat:'biz',   w:0.70},
+  {id:'ft',     name:'Yahoo Finance', url:'https://finance.yahoo.com/news/rssindex',                          cat:'biz',   w:0.72},
+
+  // —— 科技与商业 ——
+  {id:'verge',  name:'The Verge',     url:'https://www.theverge.com/rss/index.xml',                           cat:'tech',  w:0.82},
+  {id:'ars',    name:'Ars Technica',  url:'https://feeds.arstechnica.com/arstechnica/index',                  cat:'tech',  w:0.82},
+  {id:'tc',     name:'TechCrunch',    url:'https://techcrunch.com/feed/',                                     cat:'tech',  w:0.80},
+  {id:'nytt',   name:'NYT Tech',      url:'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',      cat:'tech',  w:0.95},
+  {id:'gnt',    name:'Google News',   url:G('TECHNOLOGY'),                                                     cat:'tech',  w:0.70},
+];
+
+/* CORS 代理链路：逐个尝试，任一成功即可 */
+const PROXIES = [
+  {n:'allorigins', f:u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,          json:false},
+  {n:'codetabs',   f:u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,     json:false},
+  {n:'corsproxy',  f:u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`,                   json:false},
+  {n:'thingproxy', f:u=>`https://api.cors.lol/?url=${encodeURIComponent(u)}`,                   json:false},
+  {n:'rss2json',   f:u=>`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(u)}`,json:true },
+];
+
+const REFRESH_MS = 60*60*1000;   // 每小时
+const MAX_SHOW    = 30;
+
+/* ============================================================
+   2. 小工具
+   ============================================================ */
+const $  = s => document.querySelector(s);
+const store = (()=>{                       // localStorage 安全包装
+  const mem = {};
+  try{ localStorage.setItem('_t','1'); localStorage.removeItem('_t');
+    return {get:k=>{try{return localStorage.getItem(k)}catch(e){return mem[k]??null}},
+            set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){mem[k]=v}}};
+  }catch(e){ return {get:k=>mem[k]??null, set:(k,v)=>{mem[k]=v}}; }
+})();
+
+function withTimeout(p, ms){
+  return Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), ms))]);
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function stripTags(s){ return String(s).replace(/<[^>]*>/g,' ').replace(/&[a-z#0-9]+;/gi,' ').replace(/\s+/g,' ').trim(); }
+function ago(ts){
+  const m = Math.max(0, Math.round((Date.now()-ts)/60000));
+  if(m < 1)  return '刚刚';
+  if(m < 60) return m + ' 分钟前';
+  const h = Math.round(m/60);
+  if(h < 24) return h + ' 小时前';
+  return Math.round(h/24) + ' 天前';
+}
+function clockCN(ts){
+  return new Date(ts).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+
+/* ============================================================
+   3. 抓取 + 解析 RSS / Atom
+   ============================================================ */
+const diag = {};   // feedId -> {name, ok, n, via, err}
+
+async function fetchFeed(feed){
+  for(const p of PROXIES){
+    try{
+      const res = await withTimeout(fetch(p.f(feed.url), {cache:'no-store'}), 13000);
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      let items;
+      if(p.json){
+        const j = await res.json();
+        if(j.status !== 'ok' || !j.items) throw new Error('bad json');
+        items = j.items.map(it=>({title:stripTags(it.title||''), link:it.link||'', ts:Date.parse(it.pubDate)||Date.now()}));
+      }else{
+        const txt = await res.text();
+        if(!/<(item|entry)[\s>]/i.test(txt)) throw new Error('not a feed');
+        items = parseXML(txt);
+      }
+      items = items.filter(i=>i.title && i.title.length > 14).slice(0,26);
+      if(!items.length) throw new Error('empty');
+      diag[feed.id] = {name:feed.name, ok:true, n:items.length, via:p.n};
+      return items.map(i=>({...i, src:feed.name, srcId:feed.id, cat:feed.cat, w:feed.w}));
+    }catch(e){
+      diag[feed.id] = {name:feed.name, ok:false, err:(e && e.message) || 'error'};
+    }
+  }
+  return [];
+}
+
+function parseXML(txt){
+  const doc = new DOMParser().parseFromString(txt, 'text/xml');
+  if(doc.querySelector('parsererror')){
+    const d2 = new DOMParser().parseFromString(txt, 'text/html');
+    return nodesToItems(d2.querySelectorAll('item, entry'));
+  }
+  return nodesToItems(doc.querySelectorAll('item, entry'));
+}
+function nodesToItems(nodes){
+  const out = [];
+  nodes.forEach(n=>{
+    const t = n.querySelector('title');
+    let link = '';
+    const lk = n.querySelector('link');
+    if(lk) link = lk.getAttribute('href') || lk.textContent || '';
+    const dEl = n.querySelector('pubDate, published, updated, date');
+    const ts = dEl ? (Date.parse(dEl.textContent) || Date.now()) : Date.now();
+    if(t) out.push({title:stripTags(t.textContent), link:link.trim(), ts});
+  });
+  return out;
+}
+
+/* ============================================================
+   4. 聚类：同一事件被多家媒体报道 => 交叉证实
+   ============================================================ */
+const STOP = new Set(('the a an and or but of in on at to for from with by as is are was were be been being this that these those '+
+  'it its his her their our your my he she they we you i not no than then over under after before about into out up down new news '+
+  'says say said will would can could may might more most other some such only own same so too very just says report reports '+
+  'first last year years day days week month latest live update updates video watch photos analysis opinion how why what when who '+
+  'amid after during against between across among what\'s here there').split(/\s+/));
+
+function tokens(title){
+  const clean = title.replace(/[’'`]/g,'').replace(/[^A-Za-z0-9一-龥]+/g,' ');
+  const words = clean.split(/\s+/).filter(Boolean);
+  const set = new Set(), ents = new Set();
+  words.forEach((w,i)=>{
+    const lw = w.toLowerCase();
+    if(lw.length < 4 || STOP.has(lw)) return;
+    set.add(lw);
+    if(i > 0 && /^[A-Z]/.test(w)) ents.add(lw);   // 句中大写词 ≈ 专有名词
+  });
+  return {set, ents};
+}
+function jaccard(a,b){
+  if(!a.size || !b.size) return 0;
+  let inter = 0;
+  a.forEach(v=>{ if(b.has(v)) inter++; });
+  return inter / (a.size + b.size - inter);
+}
+function sharedEnts(a,b){
+  let n=0; a.forEach(v=>{ if(b.has(v)) n++; }); return n;
+}
+
+function cluster(items){
+  const clusters = [];
+  items.forEach(it=>{
+    const tk = tokens(it.title);
+    if(tk.set.size < 2) return;
+    let best = null, bestSim = 0;
+    for(const c of clusters){
+      const sim = jaccard(tk.set, c.tk.set);
+      const se  = sharedEnts(tk.ents, c.tk.ents);
+      const hit = sim >= 0.34 || (sim >= 0.22 && se >= 2) || se >= 3;
+      if(hit && sim > bestSim){ best = c; bestSim = sim; }
+    }
+    if(best){
+      best.items.push(it);
+      it.title.length < best.rep.title.length && (best.rep = it);
+      tk.set.forEach(v=>best.tk.set.add(v));
+      tk.ents.forEach(v=>best.tk.ents.add(v));
+    }else{
+      clusters.push({rep:it, items:[it], tk:{set:new Set(tk.set), ents:new Set(tk.ents)}});
+    }
+  });
+  return clusters;
+}
+
+function score(c){
+  const srcs = new Map();
+  c.items.forEach(i=>{ if(!srcs.has(i.src) || srcs.get(i.src) < i.w) srcs.set(i.src, i.w); });
+  const n = srcs.size;
+  const wSum = [...srcs.values()].reduce((a,b)=>a+b, 0);
+  const newest = Math.max(...c.items.map(i=>i.ts));
+  const hrs = Math.max(0, (Date.now()-newest)/3600000);
+  const recency = Math.exp(-hrs/10);                    // 10 小时半衰
+  const breadth = 1 + 1.75*Math.log2(n);                // 多源覆盖 = 重要性核心信号
+  return {
+    n, srcs:[...srcs.keys()], newest,
+    v: breadth * (wSum/n) * (0.35 + 0.65*recency)
+  };
+}
+/* 一条事件可同时属于多个板块：财经/科技媒体报道过，就会出现在对应标签页里 */
+function catsOf(c){
+  const tally = {};
+  c.items.forEach(i=>{ tally[i.cat] = (tally[i.cat]||0) + i.w; });
+  const all = Object.entries(tally).sort((a,b)=>b[1]-a[1]);
+  return {primary: all[0][0], all: all.map(x=>x[0])};
+}
+
+/* ============================================================
+   5. 中文翻译（多重回退；失败则保留英文原文）
+   ============================================================ */
+const tCache = (()=>{ try{ return JSON.parse(store.get('wp_tr')||'{}'); }catch(e){ return {}; } })();
+function saveCache(){ try{
+  const keys = Object.keys(tCache);
+  if(keys.length > 900) keys.slice(0, keys.length-900).forEach(k=>delete tCache[k]);
+  store.set('wp_tr', JSON.stringify(tCache));
+}catch(e){} }
+
+async function trOne(text){
+  if(tCache[text]) return tCache[text];
+  const q = encodeURIComponent(text);
+  const routes = [
+    async()=>{ const r = await withTimeout(fetch(`https://lingva.ml/api/v1/en/zh/${q}`),7000);
+               const j = await r.json(); return j.translation; },
+    async()=>{ const r = await withTimeout(fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-CN&dt=t&q=${q}`),7000);
+               const j = await r.json(); return j[0].map(x=>x[0]).join(''); },
+    async()=>{ const r = await withTimeout(fetch(`https://api.mymemory.translated.net/get?q=${q}&langpair=en|zh-CN`),8000);
+               const j = await r.json();
+               const t = j.responseData && j.responseData.translatedText;
+               if(!t || /MYMEMORY WARNING|INVALID/i.test(t)) throw new Error('mm'); return t; },
+    async()=>{ const inner = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-CN&dt=t&q=${q}`;
+               const r = await withTimeout(fetch(PROXIES[0].f(inner)),9000);
+               const j = await r.json(); return j[0].map(x=>x[0]).join(''); },
+  ];
+  for(const go of routes){
+    try{
+      const out = await go();
+      if(out && /[一-龥]/.test(out)){ tCache[text] = out.trim(); return tCache[text]; }
+    }catch(e){}
+  }
+  return null;
+}
+
+async function translateAll(list, onProgress){
+  const queue = list.slice();
+  const workers = Array.from({length:4}, async()=>{
+    while(queue.length){
+      const card = queue.shift();
+      const zh = await trOne(card.en);
+      if(zh){ card.zh = zh; onProgress(card); }
+      else  { card.zh = null; onProgress(card); }
+    }
+  });
+  await Promise.all(workers);
+  saveCache();
+}
+
+/* ============================================================
+   6. 渲染
+   ============================================================ */
+let CARDS = [], curCat = 'all', loading = false, lastLoad = 0;
+const CATNAME = {world:'国际', biz:'财经', tech:'科技'};
+const CATCLS  = {world:'cat-world', biz:'cat-biz', tech:'cat-tech'};
+
+function render(){
+  const main = $('#main');
+  if(!CARDS.length){
+    main.innerHTML = `<div class="state">
+      <p style="font-size:15px;color:var(--label)">暂时没能连上新闻源</p>
+      <p>可能是网络或代理线路不通。<br>展开下方「数据源状态」可看到具体哪条链路失败。</p>
+      <button class="btn" onclick="load(true)">重试</button></div>`;
+    return;
+  }
+  const list = CARDS.filter(c => curCat === 'all' || c.cat === curCat ||
+                                 (c.cats && c.cats.indexOf(curCat) > -1)).slice(0, MAX_SHOW);
+  if(!list.length){ main.innerHTML = `<div class="state">该分类暂无内容</div>`; return; }
+
+  const head = list.slice(0,5), rest = list.slice(5);
+  main.innerHTML =
+    `<div class="sec">头条 · 全球最受关注</div><div class="group">${head.map((c,i)=>row(c,i+1,true)).join('')}</div>` +
+    (rest.length ? `<div class="sec">其他重要动态</div><div class="group">${rest.map((c,i)=>row(c,i+6,false)).join('')}</div>` : '');
+}
+
+function row(c, rank, top){
+  const zh = c.zh ? esc(c.zh) : esc(c.en);
+  const enLine = c.zh ? `<p class="en">${esc(c.en)}</p>`
+                      : `<p class="en pending" data-tr="${c.uid}">翻译中…</p>`;
+  const verified = c.n >= 2
+    ? `<span class="chip verify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>${c.n} 家媒体</span>`
+    : '';
+  const srcTxt = c.srcs.slice(0,3).join(' · ') + (c.srcs.length>3 ? ` +${c.srcs.length-3}` : '');
+  return `<a class="item${top?' top':''}" href="${esc(c.link)}" target="_blank" rel="noopener" data-uid="${c.uid}">
+    <div class="rank">${rank}</div>
+    <div class="body">
+      <p class="zh" data-zh="${c.uid}">${zh}</p>
+      ${enLine}
+      <div class="meta">
+        ${verified}
+        <span class="chip ${CATCLS[c.cat]}">${CATNAME[c.cat]}</span>
+        <span class="when">${ago(c.newest)}<span style="color:var(--label3)"> · </span>${esc(srcTxt)}</span>
+      </div>
+    </div></a>`;
+}
+
+function patchCard(card){
+  const zhEl = document.querySelector(`[data-zh="${card.uid}"]`);
+  const enEl = document.querySelector(`[data-tr="${card.uid}"]`);
+  if(card.zh && zhEl && enEl){
+    zhEl.textContent = card.zh;
+    enEl.textContent = card.en;
+    enEl.classList.remove('pending');
+    enEl.removeAttribute('data-tr');
+  }else if(!card.zh && enEl){
+    enEl.remove();   // 翻译不可用：只显示英文原标题（已在 .zh 行）
+  }
+}
+
+function setStatus(txt, level){
+  $('#status').textContent = txt;
+  const d = $('#dot'); d.className = 'dot' + (level ? ' '+level : '');
+}
+
+function renderDiag(){
+  const rows = FEEDS.map(f=>{
+    const d = diag[f.id];
+    if(!d) return '';
+    return `<div class="drow"><span>${esc(f.name)}<span style="color:var(--label3)"> · ${CATNAME[f.cat]}</span></span>
+      <span class="${d.ok?'ok':'bad'}">${d.ok ? d.n+' 条 · '+d.via : '失败'}</span></div>`;
+  }).join('');
+  const okN = Object.values(diag).filter(d=>d.ok).length;
+  $('#diagCount').textContent = `${okN}/${FEEDS.length} 正常`;
+  $('#diagBody').innerHTML = rows +
+    `<div class="drow" style="border-top-width:0;margin-top:6px;padding-top:10px">
+       <span>上次更新</span><span>${clockCN(lastLoad)}（北京时间）</span></div>`;
+  $('#diag').hidden = false;
+}
+
+/* ============================================================
+   7. 主流程
+   ============================================================ */
+async function load(manual){
+  if(loading) return;
+  loading = true;
+  $('#refresh').firstElementChild.classList.add('spin');
+  setStatus(manual ? '正在刷新…' : '正在接入全球媒体…', 'warn');
+
+  const results = await Promise.all(FEEDS.map(fetchFeed));
+  const items = results.flat();
+
+  lastLoad = Date.now();
+  renderDiag();
+
+  if(!items.length){
+    const cached = loadCache();
+    if(cached){ CARDS = cached.cards; render(); setStatus(`离线缓存 · ${clockCN(cached.at)} 的数据`, 'err'); }
+    else { CARDS = []; render(); setStatus('无法连接新闻源', 'err'); }
+    loading = false; $('#refresh').firstElementChild.classList.remove('spin');
+    return;
+  }
+
+  const clusters = cluster(items);
+  CARDS = clusters.map((c,i)=>{
+    const s = score(c), k = catsOf(c);
+    return {uid:'c'+i, en:c.rep.title, zh:null, link:c.rep.link,
+            cat:k.primary, cats:k.all, n:s.n, srcs:s.srcs, newest:s.newest, v:s.v};
+  }).sort((a,b)=>b.v-a.v).slice(0, 90);
+
+  // 先用缓存里的译文即时上屏
+  CARDS.forEach(c=>{ if(tCache[c.en]) c.zh = tCache[c.en]; });
+
+  render();
+  const okN = Object.values(diag).filter(d=>d.ok).length;
+  setStatus(`${clockCN(lastLoad)} 更新 · ${okN} 家媒体 · ${CARDS.length} 条事件`, okN ? '' : 'err');
+
+  loading = false;
+  $('#refresh').firstElementChild.classList.remove('spin');
+
+  // 后台补齐翻译
+  const need = CARDS.slice(0, 60).filter(c=>!c.zh);
+  if(need.length) translateAll(need, patchCard).then(()=>saveState());
+  else saveState();
+}
+
+function saveState(){
+  try{ store.set('wp_cards', JSON.stringify({at:lastLoad, cards:CARDS.slice(0,60)})); }catch(e){}
+}
+function loadCache(){
+  try{
+    const j = JSON.parse(store.get('wp_cards')||'null');
+    if(j && j.cards && j.cards.length) return j;
+  }catch(e){}
+  return null;
+}
+
+/* ---------- 交互 ---------- */
+$('#seg').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-cat]'); if(!b) return;
+  [...$('#seg').children].forEach(x=>x.setAttribute('aria-selected', String(x===b)));
+  curCat = b.dataset.cat;
+  render();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+$('#refresh').addEventListener('click', ()=>load(true));
+
+let lastY = 0;
+window.addEventListener('scroll', ()=>{
+  const y = window.scrollY;
+  $('#nav').classList.toggle('scrolled', y > 26);
+  lastY = y;
+}, {passive:true});
+
+/* 下拉刷新 */
+let startY = null;
+window.addEventListener('touchstart', e=>{ if(window.scrollY <= 0) startY = e.touches[0].clientY; }, {passive:true});
+window.addEventListener('touchmove', e=>{
+  if(startY === null) return;
+  const d = e.touches[0].clientY - startY;
+  if(d > 0 && window.scrollY <= 0){
+    $('#ptr').style.opacity = Math.min(1, d/80);
+    $('#ptr').style.transform = `translateY(${Math.min(46, d*0.5)}px) rotate(${d*3}deg)`;
+  }
+}, {passive:true});
+window.addEventListener('touchend', e=>{
+  const el = $('#ptr');
+  if(startY !== null && parseFloat(el.style.opacity||0) >= 1) load(true);
+  el.style.opacity = 0; el.style.transform = ''; startY = null;
+}, {passive:true});
+
+/* 每小时自动刷新；回到前台若已过期立刻刷新 */
+setInterval(()=>load(false), REFRESH_MS);
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden && Date.now() - lastLoad > REFRESH_MS) load(false);
+});
+setInterval(()=>{                        // 相对时间实时走动
+  if(!CARDS.length || loading) return;
+  document.querySelectorAll('.item').forEach(el=>{
+    const c = CARDS.find(x=>x.uid === el.dataset.uid); if(!c) return;
+    const w = el.querySelector('.when');
+    if(w) w.firstChild.nodeValue = ago(c.newest);
+  });
+}, 60000);
+
+/* 启动：先秒开缓存，再拉新 */
+(function boot(){
+  const cached = loadCache();
+  if(cached){
+    CARDS = cached.cards; lastLoad = cached.at; render();
+    setStatus(`${clockCN(cached.at)} 的缓存 · 正在更新…`, 'warn');
+  }
+  load(false);
+})();
+</script>
+</body>
+</html>
